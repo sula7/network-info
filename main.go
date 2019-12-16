@@ -1,7 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"log"
+
+	"github.com/sula7/network-info/config"
+)
 
 func main() {
-	fmt.Println("Hello, World!")
+	_, err := config.Get()
+	if err != nil {
+		log.Fatalln("unable to get config from env:", err)
+	}
 }
