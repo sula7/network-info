@@ -1,21 +1,19 @@
 package v1
 
 import (
-	"time"
-
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
-func NewApi() *chi.Mux {
-	r := chi.NewRouter()
+func NewApi(bindPort string) {
+	e := echo.New()
+	e.Use(middleware.Recover())
+	e.Use(middleware.Logger())
 
-	r.Use(middleware.Recoverer)
-	r.Use(middleware.Logger)
+	e.GET("/ping", ping)
 
-	r.Use(middleware.Timeout(60 * time.Second))
+	g := e.Group("/api/v1")
+	g.POST("/addresses", addresses)
 
-	r.Get("/ping", ping)
-
-	return r
+	e.Logger.Fatal(e.Start(bindPort))
 }

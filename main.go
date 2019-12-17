@@ -13,10 +13,5 @@ func main() {
 		log.Fatalln("unable to get config from env:", err)
 	}
 
-	r := v1.NewApi()
-
-	err = v1.Start(r, cfg.BindPort)
-	if err != nil {
-		log.Fatalln("unable to start HTTP server:", err)
-	}
+	v1.NewApi(cfg.BindPort)
 }
