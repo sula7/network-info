@@ -1,5 +1,12 @@
 # network-info
 
+### Program run arguments
+This app could be started using args. Just set IP addresses in args like
+
+`go run ./main.go 192.168.0.1 192.168.0.2`
+
+or run executable with the same args
+
 ### ENV
 ````
 BIND_PORT=      Listen to port. Default is :8080
