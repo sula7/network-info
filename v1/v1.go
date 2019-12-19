@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"fmt"
+	"github.com/sula7/network-info/network"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -21,7 +21,7 @@ func addresses(c echo.Context) error {
 	}
 
 	for _, ip := range ipAddresses.List {
-		fmt.Println(ip.Address)
+		go network.GetMacAddress(ip.Address)
 	}
 	return c.String(http.StatusOK, "OK")
 }
