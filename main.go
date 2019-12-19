@@ -15,11 +15,11 @@ func main() {
 		log.Fatalln("unable to get config from env:", err)
 	}
 
-	IPs := os.Args[0:]
+	IPs := os.Args[1:]
 	if len(IPs) > 1 {
 		log.Println("Parsing IP addresses from args")
 		for _, ip := range IPs {
-			network.GetMacAddress(ip)
+			network.GetIPInfo(ip)
 		}
 	}
 

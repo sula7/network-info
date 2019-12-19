@@ -7,6 +7,13 @@ This app could be started using args. Just set IP addresses in args like
 
 or run executable with the same args
 
+### Run
+This app sends ICMP packets (ping) to get some info and need higher privileges.
+
+For Windows just run executable as administrator (right click -> Run as administrator)
+
+For Linux run with `sudo`
+
 ### ENV
 ````
 BIND_PORT=      Listen to port. Default is :8080

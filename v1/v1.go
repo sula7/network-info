@@ -5,8 +5,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/sula7/network-info/network"
 	"github.com/sula7/network-info/models"
+	"github.com/sula7/network-info/network"
 )
 
 func ping(c echo.Context) error {
@@ -21,7 +21,7 @@ func addresses(c echo.Context) error {
 	}
 
 	for _, ip := range ipAddresses.List {
-		go network.GetMacAddress(ip.Address)
+		go network.GetIPInfo(ip.Address)
 	}
 	return c.String(http.StatusOK, "OK")
 }

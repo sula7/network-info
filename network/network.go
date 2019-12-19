@@ -2,18 +2,20 @@ package network
 
 import (
 	"fmt"
-	"github.com/labstack/gommon/log"
+	"log"
 	"net"
+	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/mostlygeek/arp"
 	"github.com/sparrc/go-ping"
 )
 
-func GetMacAddress(ip string) {
+func GetIPInfo(ip string) {
 	pinger, err := ping.NewPinger(ip)
 	if err != nil {
-		log.Errorf("unable to ping %s IP address: %v", ip, err)
+		log.Printf("unable to ping %s IP address: %v\n", ip, err)
 		return
 	}
 
@@ -24,5 +26,38 @@ func GetMacAddress(ip string) {
 	pinger.Run()
 
 	hostname, err := net.LookupAddr(ip)
-	fmt.Printf("%s\t%s\t%v\n", ip, arp.Search(ip), hostname)
+
+	ttl, err := GetTtl(ip)
+	if err != nil {
+		log.Println("unable to get ttl of %s: %v", ip, err)
+	}
+
+	var operatingSystem string
+	switch ttl {
+	case "64":
+		operatingSystem = "Linux OS"
+	case "128":
+		operatingSystem = "Windows OS"
+	case "254":
+		operatingSystem = "Cisco"
+	case "255":
+		operatingSystem = "FreeBSD/Unix OS"
+	default:
+		operatingSystem = "OS not detected"
+	}
+
+	fmt.Printf("%s\t%s\t%v\t%s\n", ip, arp.Search(ip), hostname, operatingSystem)
+}
+
+func GetTtl(ip string) (string, error) {
+	arg := fmt.Sprintf(`ping -c 1 %s | awk -F'[ =]' '/ttl/ {print $8}'`, ip)
+	out, err := exec.Command("bash", "-c", arg).Output()
+	if err != nil {
+		return "", err
+	}
+
+	ttl := string(out)
+	ttl = strings.TrimSuffix(ttl, "\n") //need to trim cuz contains "\n" as default
+
+	return ttl, nil
 }
