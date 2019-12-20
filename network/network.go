@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"os/exec"
+	"runtime"
 	"strings"
 	"time"
 
@@ -29,7 +30,7 @@ func GetIPInfo(ip string) {
 
 	ttl, err := GetTtl(ip)
 	if err != nil {
-		log.Println("unable to get ttl of %s: %v", ip, err)
+		log.Printf("unable to get ttl of %s: %v\n", ip, err)
 	}
 
 	var operatingSystem string
@@ -50,14 +51,47 @@ func GetIPInfo(ip string) {
 }
 
 func GetTtl(ip string) (string, error) {
-	arg := fmt.Sprintf(`ping -c 1 %s | awk -F'[ =]' '/ttl/ {print $8}'`, ip)
-	out, err := exec.Command("bash", "-c", arg).Output()
-	if err != nil {
-		return "", err
-	}
+	var arg string
+	var out []byte
+	var err error
+	var ttl string
 
-	ttl := string(out)
-	ttl = strings.TrimSuffix(ttl, "\n") //need to trim cuz contains "\n" as default
+	switch runtime.GOOS {
+	case "windows":
+		arg = fmt.Sprintf(`ping -n 1 %s | FIND "TTL="`, ip)
+		out, err = exec.Command("cmd", "/c", arg).Output()
+		if err != nil {
+			return "", err
+		}
+
+		ttl = string(out)
+		log.Println("TTL before strings", ttl)
+
+		ttl = strings.TrimLeft(ttl, "TTL=")
+		ttl = strings.Replace(ttl, "TTL=", "", -1)
+		ttl = strings.TrimSuffix(ttl, "\n") //need to trim cuz contains "\n" as default
+		fmt.Println("TTL after strings", ttl)
+
+	case "linux":
+		arg = fmt.Sprintf(`ping -c 1 %s | awk -F'[ =]' '/ttl/ {print $8}'`, ip)
+		out, err = exec.Command("bash", "-c", arg).Output()
+		if err != nil {
+			return "", err
+		}
+
+		ttl = string(out)
+		ttl = strings.TrimSuffix(ttl, "\n") //need to trim cuz contains "\n" as default
+
+	default:
+		arg = fmt.Sprintf(`ping -c 1 %s | awk -F'[ =]' '/ttl/ {print $8}'`, ip)
+		out, err = exec.Command("bash", "-c", arg).Output()
+		if err != nil {
+			return "", err
+		}
+
+		ttl = string(out)
+		ttl = strings.TrimSuffix(ttl, "\n") //need to trim cuz contains "\n" as default
+	}
 
 	return ttl, nil
 }
